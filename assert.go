@@ -82,10 +82,37 @@ func AssertBool(expected, got bool, mode PanicMode, arg ...any) {
 
 func NotNil(intf any, mode PanicMode, arg ...any) {
 
-	if intf == nil || reflect.ValueOf(intf).IsNil() {
+	if IsNill(intf) {
 		log(nil, arg...)
 		handlePanic(mode)
 	}
+}
+
+// IsNill returns true intf is nil
+func IsNill(intf any) bool {
+	if intf == nil {
+		return true
+	}
+
+	if canIsNil(intf) {
+		return reflect.ValueOf(intf).IsNil()
+	}
+
+	return false
+}
+
+func canIsNil(intf any) bool {
+
+	v := reflect.ValueOf(intf)
+	switch v.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Pointer, reflect.UnsafePointer:
+		fallthrough
+	case reflect.Interface, reflect.Slice:
+		return true
+	default:
+		return false
+	}
+
 }
 
 func StrNotEmpty(str string, mode PanicMode, arg ...any) {
